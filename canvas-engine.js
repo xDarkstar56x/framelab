@@ -40,6 +40,7 @@ export function renderFrame(canvas, image, appState) {
     const photoParams = [appState.focal, appState.aperture, appState.shutter, appState.iso].filter(v => v && v.trim() !== "");
     
     const leftText = leftArr.join("  •  ");
+    // Añadimos espacios extra para separar los metadatos fotográficos de la fecha y el GPS
     const rightText = [...photoParams, appState.date, appState.gps].filter(v => v && v.trim() !== "").join("      •      ");
 
     let alignType = appState.textAlignment;
@@ -73,12 +74,11 @@ export function renderFrame(canvas, image, appState) {
         const extraParams = [appState.date, appState.gps].filter(v => v && v.trim() !== "");
         if (extraParams.length > 0) textLines.push({ text: extraParams.join("       •       "), size: sizeExif, isTitle: false });
         
-        // Condicional de los pixeles
         if (appState.showRes) textLines.push({ text: `${image.width}×${image.height}`, size: sizeExif, isTitle: false });
     }
 
     const hasPalette = appState.palette && appState.palette.length > 0;
-    const pSize = canvas.width * 0.022; // Aumentamos tamaño de Pincelada en el render
+    const pSize = canvas.width * 0.012; 
     const pGap = canvas.width * 0.015;
     const pTotalW = hasPalette ? (pSize * appState.palette.length) + (pGap * (appState.palette.length - 1)) : 0;
     const spaceBetweenTextAndPalette = longestSide * 0.02;
@@ -103,7 +103,7 @@ export function renderFrame(canvas, image, appState) {
         if (hasPalette) {
             const palX = (canvas.width - pTotalW) / 2;
             const palY = bottomCenterY + (totalH / 2) - pSize;
-            drawBrushPalette(ctx, appState.palette, palX, palY, pSize, pGap);
+            drawCirclePalette(ctx, appState.palette, palX, palY, pSize, pGap);
         }
 
     } else if (alignType === 'modern_left') {
@@ -121,7 +121,7 @@ export function renderFrame(canvas, image, appState) {
         if (hasPalette) {
             const palX = canvas.width - mr - pTotalW;
             const palY = bottomCenterY - (pSize / 2); 
-            drawBrushPalette(ctx, appState.palette, palX, palY, pSize, pGap);
+            drawCirclePalette(ctx, appState.palette, palX, palY, pSize, pGap);
         }
 
     } else if (alignType === 'split') {
@@ -140,20 +140,25 @@ export function renderFrame(canvas, image, appState) {
         if (hasPalette) {
             const palX = (canvas.width - pTotalW) / 2;
             const palY = bottomCenterY + (totalH / 2) - pSize;
-            drawBrushPalette(ctx, appState.palette, palX, palY, pSize, pGap); 
+            drawCirclePalette(ctx, appState.palette, palX, palY, pSize, pGap); 
         }
     }
 
-    function drawBrushPalette(context, colors, startX, startY, size, gap) {
-        const brushPath = new Path2D('M12,30 L25,12 L45,22 L65,8 L85,25 L98,15 L92,42 L100,65 L82,82 L90,98 L65,85 L42,95 L22,82 L5,95 L12,65 L2,42 Z');
-        
+    // -----------------------------------------------------------
+    // FUNCIÓN AUXILIAR: DIBUJAR CÍRCULOS EN EL LIENZO
+    // -----------------------------------------------------------
+    function drawCirclePalette(context, colors, startX, startY, size, gap) {
         colors.forEach((color, i) => {
-            context.save();
-            context.translate(startX + (i * (size + gap)), startY);
-            context.scale(size / 100, size / 100);
             context.fillStyle = color;
-            context.fill(brushPath);
-            context.restore();
+            context.beginPath();
+            context.arc(startX + (i * (size + gap)) + size/2, startY + size/2, size/2, 0, Math.PI*2);
+            context.fill(); 
+            context.closePath();
+            
+            // Borde sutil para que colores como el blanco resalten
+            context.lineWidth = 1;
+            context.strokeStyle = 'rgba(0,0,0,0.15)';
+            context.stroke();
         });
     }
 }

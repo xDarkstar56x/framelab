@@ -24,7 +24,6 @@
             overflow: hidden;
         }
         
-        /* --- ENCABEZADO SUPERIOR (Botón Centrado) --- */
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
             background: var(--panel); padding: 10px 20px;
@@ -79,21 +78,16 @@
         .flex-row { display: flex; gap: 10px; }
         .flex-row > div { flex: 1; }
 
-        /* --- PINCELADAS MÁS GRANDES --- */
         .swatch-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
         .color-swatch {
-            width: 42px; height: 42px; cursor: pointer;
-            -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,30 L25,12 L45,22 L65,8 L85,25 L98,15 L92,42 L100,65 L82,82 L90,98 L65,85 L42,95 L22,82 L5,95 L12,65 L2,42 Z'/%3E%3C/svg%3E");
-            -webkit-mask-size: 100% 100%;
-            -webkit-mask-repeat: no-repeat;
-            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,30 L25,12 L45,22 L65,8 L85,25 L98,15 L92,42 L100,65 L82,82 L90,98 L65,85 L42,95 L22,82 L5,95 L12,65 L2,42 Z'/%3E%3C/svg%3E");
-            mask-size: 100% 100%;
-            mask-repeat: no-repeat;
-            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));
-            transition: transform 0.2s, filter 0.2s;
+            width: 32px; height: 32px; cursor: pointer; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
-        .color-swatch:hover { transform: scale(1.10); }
-        .color-swatch.active { transform: scale(1.15); filter: drop-shadow(0px 0px 5px var(--ui-cyan)); }
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.active { 
+            transform: scale(1.15); border-color: var(--ui-cyan); box-shadow: 0 0 8px var(--ui-cyan);
+        }
 
         button.btn-primary {
             width: 100%; padding: 12px; background: var(--ui-cyan); color: #121212; border: none;
@@ -139,6 +133,10 @@
         .checkbox-label input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--ui-cyan); margin: 0;}
         .btn-download-final { background: var(--ui-cyan); color: #1a1a1a; padding: 10px 24px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; }
         .btn-download-final:hover { opacity: 0.9; }
+        
+        .donation-links { display: flex; gap: 10px; margin-top: 20px; }
+        .donation-links a { flex: 1; text-align: center; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; color: #121212; transition: opacity 0.2s; }
+        .donation-links a:hover { opacity: 0.8; }
 
         @media (max-width: 768px) {
             body { overflow: auto; }
@@ -146,16 +144,16 @@
             .sidebar { width: 100%; order: 2; border-right: none; }
             .preview-area { width: 100%; order: 1; position: sticky; top: 0; height: 45vh; z-index: 10; padding: 10px; box-sizing: border-box;}
             .top-bar-left { display: none; }
+            .donation-links { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
     <div class="top-bar">
         <div class="top-bar-left"></div>
         <div class="top-bar-center">
-            <button id="btnOpenDonate" class="btn-donate-small">❤️ Donar</button>
+            <button id="btnOpenDonate" class="btn-donate-small">❤️ Donar ❤️</button>
         </div>
         <div class="top-bar-right">
             <a id="btnOpenAbout">Acerca del proyecto</a>
@@ -326,14 +324,26 @@
             </div>
         </div>
 
-        <div id="modalDonate" class="modal-content"><button class="close-btn">&times;</button><h3>Apoya a FrameLab</h3><p>FrameLab es de código abierto. Si te ahorra tiempo en tu flujo de trabajo, considera invitarnos un café.</p></div>
+        <div id="modalDonate" class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3>Apoya a FrameLab</h3>
+            <p>FrameLab es de código abierto. Si te ahorra tiempo en tu flujo de trabajo, considera invitarnos un café para acompañar una galleta de De Galletas Corazón.</p>
+            
+            <div class="donation-links">
+                <a href="https://www.paypal.me/xdarkstar56x" target="_blank" style="background: #0070ba; color: white;">PayPal</a>
+                
+            </div>
+        </div>
+
         <div id="modalFAQ" class="modal-content"><button class="close-btn">&times;</button><h3>Preguntas Frecuentes</h3><p>Recomendamos encarecidamente utilizar JPEG originales directos de cámara para no perder la información EXIF.</p></div>
+        
         <div id="modalAbout" class="modal-content">
             <button class="close-btn">&times;</button>
             <h3>Acerca del Proyecto</h3>
-            <p>FrameLab es un proyecto creado por Néstor Oswaldo Chávez Aguirre. Está hecho por y para los fotógrafos, para todos aquellos apasionados en capturar momentos inolvidables y saber los datos EXIF.</p>
+            <p>FrameLab es un proyecto creado por xDarkstar56x. Está hecho por y para los fotógrafos, para todos aquellos apasionados en capturar momentos inolvidables y saber los datos EXIF.</p>
             <p>Desarrollado para automatizar la presentación editorial con metadatos técnicos en segundos, procesando todo localmente para garantizar tu privacidad.</p>
         </div>
+        
         <div id="modalPrivacy" class="modal-content">
             <button class="close-btn">&times;</button>
             <h3>Aviso de Privacidad</h3>

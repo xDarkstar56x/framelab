@@ -26,7 +26,7 @@ const inputs = {
     iso: document.getElementById('inIso'),
     date: document.getElementById('inDate'),
     gps: document.getElementById('inGPS'),
-    showRes: document.getElementById('inShowRes') // Nuevo
+    showRes: document.getElementById('inShowRes')
 };
 
 const exportUI = {
@@ -238,8 +238,7 @@ function updatePreview() {
         textAlignment: inputs.textAlignment.value, fontFamily: inputs.font.value, fontStyle: fontStyle.trim(),
         borderTop: parseInt(inputs.borderTop.value), borderBottom: parseInt(inputs.borderBottom.value),
         fontSizeMain: parseInt(inputs.fontSizeMain.value), fontSizeExif: parseInt(inputs.fontSizeExif.value),
-        shadow: inputs.shadow.checked,
-        showRes: inputs.showRes.checked // Enviamos el valor del toggle de resolución
+        shadow: inputs.shadow.checked, showRes: inputs.showRes.checked
     };
 
     renderFrame(canvas, processedImage, currentData);
@@ -303,8 +302,7 @@ exportUI.btnDownload.addEventListener('click', () => {
             textAlignment: inputs.textAlignment.value, fontFamily: inputs.font.value, fontStyle: fontStyle.trim(),
             borderTop: parseInt(inputs.borderTop.value), borderBottom: parseInt(inputs.borderBottom.value),
             fontSizeMain: parseInt(inputs.fontSizeMain.value), fontSizeExif: parseInt(inputs.fontSizeExif.value),
-            shadow: inputs.shadow.checked,
-            showRes: inputs.showRes.checked
+            shadow: inputs.shadow.checked, showRes: inputs.showRes.checked
         };
         
         const exportCanvas = document.createElement('canvas');
