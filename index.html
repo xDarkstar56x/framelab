@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrameLab - Estudio</title>
+    <style>
+        :root {
+            --bg: #343838;         
+            --panel: #005F6B;      
+            --text: #ffffff;
+            --accent: #00B4CC;     
+            --donate: #008C9E;     
+            --ui-cyan: #00DFFC;    
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* --- ENCABEZADO SUPERIOR (Botón Centrado) --- */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--panel); padding: 10px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .top-bar-left { flex: 1; }
+        .top-bar-center { flex: 1; display: flex; justify-content: center; }
+        .top-bar-right { flex: 1; display: flex; justify-content: flex-end; gap: 20px; }
+        
+        .top-bar a { color: #fff; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
+        .top-bar a:hover { text-decoration: underline; color: var(--ui-cyan); }
+        .btn-donate-small {
+            background: var(--donate); color: white; border: none; padding: 6px 15px;
+            border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem;
+        }
+        .btn-donate-small:hover { background: var(--accent); }
+
+        .main-container { display: flex; flex-grow: 1; overflow: hidden; }
+        .sidebar {
+            width: 350px; background: var(--panel); padding: 20px;
+            overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box; display: flex; flex-direction: column;
+        }
+        .preview-area {
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
+            padding: 20px; overflow: hidden; background: #252828;
+        }
+        canvas {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .custom-file-upload {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.4);
+            border-radius: 6px; color: #fff; font-size: 1rem; cursor: pointer; transition: all 0.2s;
+            box-sizing: border-box; margin-bottom: 15px;
+        }
+        .custom-file-upload:hover { background: rgba(0,0,0,0.4); border-color: var(--ui-cyan); color: var(--ui-cyan); }
+        .custom-file-upload svg { width: 20px; height: 20px; }
+        #inputImage { display: none; }
+
+        h2 { font-size: 1.1rem; margin-top: 25px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
+        h2:first-child { margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: #d0d0d0; }
+        input[type="text"], select {
+            width: 100%; padding: 8px; box-sizing: border-box;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px;
+        }
+        option { background: var(--panel); color: #fff; }
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row > div { flex: 1; }
+
+        /* --- PINCELADAS MÁS GRANDES --- */
+        .swatch-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
+        .color-swatch {
+            width: 42px; height: 42px; cursor: pointer;
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,30 L25,12 L45,22 L65,8 L85,25 L98,15 L92,42 L100,65 L82,82 L90,98 L65,85 L42,95 L22,82 L5,95 L12,65 L2,42 Z'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            -webkit-mask-repeat: no-repeat;
+            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,30 L25,12 L45,22 L65,8 L85,25 L98,15 L92,42 L100,65 L82,82 L90,98 L65,85 L42,95 L22,82 L5,95 L12,65 L2,42 Z'/%3E%3C/svg%3E");
+            mask-size: 100% 100%;
+            mask-repeat: no-repeat;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));
+            transition: transform 0.2s, filter 0.2s;
+        }
+        .color-swatch:hover { transform: scale(1.10); }
+        .color-swatch.active { transform: scale(1.15); filter: drop-shadow(0px 0px 5px var(--ui-cyan)); }
+
+        button.btn-primary {
+            width: 100%; padding: 12px; background: var(--ui-cyan); color: #121212; border: none;
+            border-radius: 4px; font-size: 1rem; cursor: pointer; font-weight: bold; margin-top: 10px;
+        }
+        button.btn-primary:hover { opacity: 0.8; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin-bottom: 10px; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--ui-cyan); border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb {
+            height: 16px; width: 16px; border-radius: 50%; background: var(--bg); cursor: pointer;
+            -webkit-appearance: none; margin-top: -6px; border: 2px solid var(--ui-cyan);
+        }
+        input[type=range]:disabled::-webkit-slider-runnable-track { background: #555; }
+        input[type=range]:disabled::-webkit-slider-thumb { border-color: #555; background: #333; }
+        input[type=range]:disabled { opacity: 0.5; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            display: none; background: var(--bg); padding: 30px; border-radius: 12px;
+            max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;
+            line-height: 1.5; color: #ccc; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #444;
+        }
+        .modal-content.active { display: block; }
+        .modal-content h3 { color: #fff; margin-top: 0; margin-bottom: 5px; font-size:1.3rem;}
+        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #aaa; border: none; background: transparent; padding: 0;}
+        .close-btn:hover { color: #fff; }
+
+        .download-settings .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
+        .radio-group { display: flex; gap: 20px; align-items: center; margin-bottom: 25px; }
+        .radio-group label { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 1rem; cursor: pointer; margin: 0; }
+        .slider-header { display: flex; justify-content: space-between; color: #fff; font-size: 0.9rem; margin-bottom: 8px; }
+        .stats-box { border-top: 1px solid #444; border-bottom: 1px solid #444; padding: 15px 0; margin-bottom: 20px; font-size: 0.85rem; color: #aaa; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .stats-row:last-child { margin-bottom: 0; margin-top: 15px; }
+        .stats-row span:last-child { color: #fff; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; color: #fff; cursor: pointer; margin-bottom: 5px; }
+        .checkbox-label input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--ui-cyan); margin: 0;}
+        .btn-download-final { background: var(--ui-cyan); color: #1a1a1a; padding: 10px 24px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; }
+        .btn-download-final:hover { opacity: 0.9; }
+
+        @media (max-width: 768px) {
+            body { overflow: auto; }
+            .main-container { flex-direction: column; overflow: visible; }
+            .sidebar { width: 100%; order: 2; border-right: none; }
+            .preview-area { width: 100%; order: 1; position: sticky; top: 0; height: 45vh; z-index: 10; padding: 10px; box-sizing: border-box;}
+            .top-bar-left { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="top-bar">
+        <div class="top-bar-left"></div>
+        <div class="top-bar-center">
+            <button id="btnOpenDonate" class="btn-donate-small">❤️ Donar</button>
+        </div>
+        <div class="top-bar-right">
+            <a id="btnOpenAbout">Acerca del proyecto</a>
+            <a id="btnOpenFAQ">Preguntas Frecuentes</a>
+            <a id="btnOpenPrivacy">Aviso de Privacidad</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            
+            <label for="inputImage" class="custom-file-upload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Seleccionar Imagen
+            </label>
+            <input type="file" id="inputImage" accept="image/jpeg, image/png, image/webp">
+
+            <h2>1. Diseño y Recorte</h2>
+            <div class="form-group">
+                <label>Plantilla Rápida</label>
+                <select id="presetSelect">
+                    <option value="minimal_white">Minimal Blanco</option>
+                    <option value="polaroid">Polaroid Vintage</option>
+                    <option value="brand_sony">Sony Alpha Pro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Fondo</label>
+                <div class="swatch-container" id="bgSwatches">
+                    <div class="color-swatch" style="background-color: #FFFFFF;" data-color="#FFFFFF" title="Blanco Puro"></div>
+                    <div class="color-swatch active" style="background-color: #F2F2F2;" data-color="#F2F2F2" title="Blanco Hueso"></div>
+                    <div class="color-swatch" style="background-color: #0A0C0D;" data-color="#0A0C0D" title="Negro"></div>
+                    <div class="color-swatch" style="background-color: #DAD6CA;" data-color="#DAD6CA" title="Beige"></div>
+                    <div class="color-swatch" style="background-color: #eee8e8;" data-color="#eee8e8" title="Gris"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Texto</label>
+                <div class="swatch-container" id="textSwatches">
+                    <div class="color-swatch active" style="background-color: #0A0C0D;" data-color="#0A0C0D" title="Negro"></div>
+                    <div class="color-swatch" style="background-color: #FFFFFF;" data-color="#FFFFFF" title="Blanco Puro"></div>
+                    <div class="color-swatch" style="background-color: #F2F2F2;" data-color="#F2F2F2" title="Blanco Hueso"></div>
+                    <div class="color-swatch" style="background-color: #DAD6CA;" data-color="#DAD6CA" title="Beige"></div>
+                    <div class="color-swatch" style="background-color: #eee8e8;" data-color="#eee8e8" title="Gris"></div>
+                    <div class="color-swatch" style="background-color: #1b325f;" data-color="#1b325f" title="Azul"></div>
+                    <div class="color-swatch" style="background-color: #ff0048;" data-color="#ff0048" title="Rojo Pasión"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Relación de Aspecto (Crop)</label>
+                <select id="inRatio">
+                    <option value="original">Original</option>
+                    <option value="1:1">1:1 (Cuadrado)</option>
+                    <option value="3:2">3:2 (Clásico)</option>
+                    <option value="4:3">4:3</option>
+                    <option value="4:5">4:5 (Instagram Vertical)</option>
+                    <option value="16:9">16:9 (Panorámico)</option>
+                </select>
+            </div>
+            <div class="flex-row">
+                <div class="form-group"><label>Encuadre X</label><input type="range" id="inCropX" min="-100" max="100" value="0" disabled></div>
+                <div class="form-group"><label>Encuadre Y</label><input type="range" id="inCropY" min="-100" max="100" value="0" disabled></div>
+            </div>
+
+            <h2>2. Ajustes de Marco y Texto</h2>
+            <div class="flex-row">
+                <div class="form-group"><label>Borde (%)</label><input type="range" id="inBorderTop" min="0" max="20" value="5"></div>
+                <div class="form-group"><label>Inferior</label><input type="range" id="inBorderBottom" min="5" max="40" value="15"></div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="checkbox-label"><input type="checkbox" id="inShadow" checked> Sombra 3D en Fotografía</label>
+            </div>
+
+            <div class="form-group">
+                <label>Alineación y Distribución</label>
+                <select id="inTextAlignment">
+                    <option value="modern_left">Bloque Moderno (Izquierda)</option>
+                    <option value="modern_center">Bloque Moderno (Centro)</option>
+                    <option value="split">Línea Única (Clásico)</option>
+                </select>
+            </div>
+
+            <div class="flex-row">
+                <div class="form-group"><label>Tam. Título</label><input type="range" id="inFontSizeMain" min="8" max="40" value="16"></div>
+                <div class="form-group"><label>Tam. EXIF</label><input type="range" id="inFontSizeExif" min="6" max="25" value="10"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Fuente Tipográfica</label>
+                <select id="inFont">
+                    <option value="system-ui, sans-serif">Moderna (System)</option>
+                    <option value="'Courier New', monospace">Máquina de Escribir (Courier)</option>
+                    <option value="'Times New Roman', serif">Clásica (Times)</option>
+                    <option value="Arial, sans-serif">Limpia (Arial)</option>
+                    <option value="'Georgia', serif">Elegante (Georgia)</option>
+                </select>
+            </div>
+            <div class="flex-row" style="margin-bottom: 15px;">
+                <label class="checkbox-label"><input type="checkbox" id="inBold" checked> Negrita</label>
+                <label class="checkbox-label"><input type="checkbox" id="inItalic"> Cursiva</label>
+            </div>
+
+            <h2>3. Datos EXIF</h2>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="checkbox-label"><input type="checkbox" id="inShowRes" checked> Mostrar Resolución (Píxeles)</label>
+            </div>
+
+            <div class="form-group"><label>Autor / Título</label><input type="text" id="inAuthor"></div>
+            <div class="form-group"><label>Cámara</label><input type="text" id="inCamera"></div>
+            <div class="form-group"><label>Lente</label><input type="text" id="inLens"></div>
+            <div class="flex-row">
+                <div class="form-group"><label>Focal</label><input type="text" id="inFocal"></div>
+                <div class="form-group"><label>Apertura</label><input type="text" id="inAperture"></div>
+            </div>
+            <div class="flex-row">
+                <div class="form-group"><label>Velocidad</label><input type="text" id="inShutter"></div>
+                <div class="form-group"><label>ISO</label><input type="text" id="inIso"></div>
+            </div>
+            <div class="flex-row">
+                <div class="form-group"><label>Fecha y Hora</label><input type="text" id="inDate"></div>
+                <div class="form-group"><label>GPS</label><input type="text" id="inGPS"></div>
+            </div>
+
+            <h2>4. Exportar</h2>
+            <button id="btnOpenExport" class="btn-primary">Exportar Ajustes...</button>
+        </div>
+
+        <div class="preview-area">
+            <canvas id="previewCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- MODALES OCULTOS -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div id="modalDownload" class="modal-content download-settings">
+            <button class="close-btn">&times;</button>
+            <h3>Ajustes de Exportación</h3>
+            <p class="subtitle">Elige el formato y calidad de la imagen final.</p>
+            <div class="radio-group">
+                <label style="color:#aaa; margin-right:20px; font-size:0.9rem;">Formato</label>
+                <label><input type="radio" name="outFormat" value="image/png"> PNG</label>
+                <label><input type="radio" name="outFormat" value="image/jpeg" checked> JPEG</label>
+            </div>
+            <div>
+                <div class="slider-header"><span>Calidad</span> <span id="lblQuality">100%</span></div>
+                <input type="range" id="outQuality" min="10" max="100" value="100">
+            </div>
+            <div>
+                <div class="slider-header"><span>Escala de Resolución</span> <span id="lblScale">100%</span></div>
+                <input type="range" id="outScale" min="10" max="100" value="100" step="10">
+            </div>
+            <div class="stats-box">
+                <div class="stats-row"><span>Total:</span> <span id="statTotalDim">0 x 0 px</span></div>
+                <div class="stats-row"><span>Imagen:</span> <span id="statImageDim">0 x 0 px</span></div>
+                <div class="stats-row"><span>Peso Estimado:</span> <span id="statSize">0 MB</span></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="checkbox-label" style="margin: 0;"><input type="checkbox" id="outRemember" checked> Recordar ajustes</label>
+                <button id="btnConfirmDownload" class="btn-download-final">Descargar</button>
+            </div>
+        </div>
+
+        <div id="modalDonate" class="modal-content"><button class="close-btn">&times;</button><h3>Apoya a FrameLab</h3><p>FrameLab es de código abierto. Si te ahorra tiempo en tu flujo de trabajo, considera invitarnos un café.</p></div>
+        <div id="modalFAQ" class="modal-content"><button class="close-btn">&times;</button><h3>Preguntas Frecuentes</h3><p>Recomendamos encarecidamente utilizar JPEG originales directos de cámara para no perder la información EXIF.</p></div>
+        <div id="modalAbout" class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3>Acerca del Proyecto</h3>
+            <p>FrameLab es un proyecto creado por Néstor Oswaldo Chávez Aguirre. Está hecho por y para los fotógrafos, para todos aquellos apasionados en capturar momentos inolvidables y saber los datos EXIF.</p>
+            <p>Desarrollado para automatizar la presentación editorial con metadatos técnicos en segundos, procesando todo localmente para garantizar tu privacidad.</p>
+        </div>
+        <div id="modalPrivacy" class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3>Aviso de Privacidad</h3>
+            <p><strong>Tus fotografías te pertenecen únicamente a ti.</strong></p>
+            <p>FrameLab está diseñado bajo una arquitectura de procesamiento Client-Side. Cuando cargas una imagen, <strong>nunca se sube a ningún servidor</strong>. Todo el análisis y generación ocurren en tu dispositivo. Tu privacidad está garantizada.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
