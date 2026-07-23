@@ -106,8 +106,8 @@ inputs.preset.addEventListener('change', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    inputs.author.value = "Between Seasons";
-    inputs.camera.value = "Sony a7 IV";
+    inputs.author.value = "Titulo";
+    inputs.camera.value = "Sony a1 II";
     inputs.lens.value = "Tamron 28-75mm f/2.8";
     inputs.focal.value = "28mm";
     inputs.aperture.value = "f/4";
